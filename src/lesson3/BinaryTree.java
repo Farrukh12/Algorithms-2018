@@ -221,8 +221,39 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
-        // TODO
-        throw new NotImplementedError();
+        SortedSet<T> treeSet = new TreeSet<>();
+        headSet(root, toElement, treeSet);
+        return treeSet;
+    }
+    private void headSet(Node<T> current, T toElement, SortedSet<T> result) {
+        int compare = toElement.compareTo(current.value);
+        if (current.left != null){
+            headSet(current.left, toElement, result);
+        }
+        if (compare > 0) {
+            result.add(current.value);
+            if (current.right != null) {
+                headSet(current.right, toElement, result);
+            }
+            if (current.left != null) {
+                headSet(current.left, toElement, result);
+            }
+        } else if (compare == 0) {
+            if (current.left != null) {
+                addtoSet(current.left, result);
+            }
+        }
+    }
+
+    private void addtoSet(Node<T> node, SortedSet<T> result) {
+        result.add(node.value);
+        if (node.right != null) {
+            addtoSet(node.right, result);
+        }
+        if (node.left != null) {
+            addtoSet(node.left, result);
+        }
+
     }
 
     /**
