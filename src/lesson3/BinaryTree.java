@@ -36,12 +36,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         Node<T> newNode = new Node<>(t);
         if (closest == null) {
             root = newNode;
-        }
-        else if (comparison < 0) {
+        } else if (comparison < 0) {
             assert closest.left == null;
             closest.left = newNode;
-        }
-        else {
+        } else {
             assert closest.right == null;
             closest.right = newNode;
         }
@@ -66,8 +64,46 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      */
     @Override
     public boolean remove(Object o) {
-        // TODO
-        throw new NotImplementedError();
+        if (root == null) return false;
+        T t = (T) o;
+        root = remove(root, t);
+        size--;
+        return true;
+
+    }
+
+    private Node<T> remove(Node<T> node, T t) {
+        if (node == null) return null;
+        int compare = t.compareTo(node.value);
+        if (compare == 0){
+            if (node.right == null || node.left == null) {
+
+                if (node.right != null) return node.right;
+                else return node.left;
+
+            } else {
+
+                Node minNode1 = new Node<>(minNode(node.right).value);
+                minNode1.left = node.left;
+                minNode1.right = node.right;
+                node = minNode1;
+
+                node.right = remove(node.right, node.value);
+            }
+        }
+        if (compare > 0) {
+            node.right = remove(node.right, t);
+        } else if (compare < 0) {
+            node.left = remove(node.left, t);
+        }
+        return node;
+    }
+    private Node<T> minNode(Node<T> node){
+        Node<T> nodeMinimum = node;
+        while (nodeMinimum.left != null) {
+            nodeMinimum = nodeMinimum.left;
+        }
+        return nodeMinimum;
     }
 
     @Override
@@ -87,12 +123,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         int comparison = value.compareTo(start.value);
         if (comparison == 0) {
             return start;
-        }
-        else if (comparison < 0) {
+        } else if (comparison < 0) {
             if (start.left == null) return start;
             return find(start.left, value);
-        }
-        else {
+        } else {
             if (start.right == null) return start;
             return find(start.right, value);
         }
@@ -101,16 +135,34 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     public class BinaryTreeIterator implements Iterator<T> {
 
         private Node<T> current = null;
+        private Stack<Node<T>> stack;
 
-        private BinaryTreeIterator() {}
+        private BinaryTreeIterator() {
+            stack = new Stack<>();
+        }
 
         /**
          * Поиск следующего элемента
          * Средняя
          */
         private Node<T> findNext() {
-            // TODO
-            throw new NotImplementedError();
+            if (root == null || (current != null && current.value == last())) return null;
+            if (current == null) {
+                current = root;
+                while (current.left != null) {
+                    stack.push(current);
+                    current = current.left;
+                }
+                return current;
+            }
+            if (current.right == null) return current = stack.pop();
+            current = current.right;
+            while (current.left != null){
+                stack.push(current);
+                current = current.left;
+            }
+            return current;
+
         }
 
         @Override
@@ -121,7 +173,6 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         @Override
         public T next() {
             current = findNext();
-            if (current == null) throw new NoSuchElementException();
             return current.value;
         }
 
@@ -131,8 +182,6 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public void remove() {
-            // TODO
-            throw new NotImplementedError();
         }
     }
 
