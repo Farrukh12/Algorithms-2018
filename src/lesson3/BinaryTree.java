@@ -11,7 +11,7 @@ import java.util.*;
 public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
     private static class Node<T> {
-        final T value;
+        T value;
 
         Node<T> left = null;
 
@@ -66,7 +66,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     public boolean remove(Object o) {
         if (root == null) return false;
         T t = (T) o;
-        root = remove(root, t);
+        root = remove(root, (T) t);
         size--;
         return true;
 
@@ -75,7 +75,12 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     private Node<T> remove(Node<T> node, T t) {
         if (node == null) return null;
         int compare = t.compareTo(node.value);
-        if (compare == 0){
+        if (compare > 0) {
+            node.right = remove(node.right, t);
+        } else if (compare < 0) {
+            node.left = remove(node.left, t);
+        }
+        else {
             if (node.right == null || node.left == null) {
 
                 if (node.right != null) return node.right;
@@ -91,11 +96,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
                 node.right = remove(node.right, node.value);
             }
         }
-        if (compare > 0) {
-            node.right = remove(node.right, t);
-        } else if (compare < 0) {
-            node.left = remove(node.left, t);
-        }
+
         return node;
     }
     private Node<T> minNode(Node<T> node){
@@ -105,6 +106,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         }
         return nodeMinimum;
     }
+
+
 
     @Override
     public boolean contains(Object o) {
@@ -157,7 +160,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             }
             if (current.right == null) return current = stack.pop();
             current = current.right;
-            while (current.left != null){
+            while (current.left != null) {
                 stack.push(current);
                 current = current.left;
             }
@@ -221,13 +224,14 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
-        SortedSet<T> treeSet = new TreeSet<>();
-        headSet(root, toElement, treeSet);
-        return treeSet;
+        SortedSet<T> result = new TreeSet<>();
+        headSet(root, toElement, result);
+        return result;
     }
+
     private void headSet(Node<T> current, T toElement, SortedSet<T> result) {
         int compare = toElement.compareTo(current.value);
-        if (current.left != null){
+        if (current.left != null) {
             headSet(current.left, toElement, result);
         }
         if (compare > 0) {
