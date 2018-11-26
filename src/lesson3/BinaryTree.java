@@ -6,8 +6,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-// Attention: comparable supported but comparator is not
-@SuppressWarnings("WeakerAccess")
 public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
     private static class Node<T> {
@@ -107,8 +105,6 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         return nodeMinimum;
     }
 
-
-
     @Override
     public boolean contains(Object o) {
         @SuppressWarnings("unchecked")
@@ -138,10 +134,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     public class BinaryTreeIterator implements Iterator<T> {
 
         private Node<T> current = null;
-        private Stack<Node<T>> stack;
 
         private BinaryTreeIterator() {
-            stack = new Stack<>();
         }
 
         /**
@@ -149,23 +143,30 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          * Средняя
          */
         private Node<T> findNext() {
-            if (root == null || (current != null && current.value == last())) return null;
-            if (current == null) {
-                current = root;
-                while (current.left != null) {
-                    stack.push(current);
-                    current = current.left;
-                }
-                return current;
-            }
-            if (current.right == null) return current = stack.pop();
-            current = current.right;
-            while (current.left != null) {
-                stack.push(current);
-                current = current.left;
-            }
-            return current;
+            Node<T> node;
+            if (current != null)
+                node = current;
+            else
+                return find(first());
 
+            if (root == null) return null;
+            if (node.right == null) {
+                Node<T> findNode = null;
+                Node<T> parent = root;
+                while (parent != node && parent != null) {
+                    int comparison = node.value.compareTo(parent.value);
+
+                    if (comparison > 0)
+                        parent = parent.right;
+                    else {
+                        findNode = parent;
+                        parent = parent.left;
+                    }
+                }
+                return findNode;
+            } else {
+                return minNode(node.right);
+            }
         }
 
         @Override
@@ -176,6 +177,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         @Override
         public T next() {
             current = findNext();
+            if (current == null) throw new NoSuchElementException();
             return current.value;
         }
 
@@ -183,8 +185,11 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          * Удаление следующего элемента
          * Сложная
          */
+
         @Override
         public void remove() {
+            if (current != null)
+                BinaryTree.this.remove(current.value);
         }
     }
 
