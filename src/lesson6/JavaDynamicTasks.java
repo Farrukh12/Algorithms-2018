@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
 
+import static java.lang.Math.min;
+
 @SuppressWarnings("unused")
 public class JavaDynamicTasks {
     /**
@@ -68,7 +70,7 @@ public class JavaDynamicTasks {
             index = prev[index];
         }
         List<Integer> answer = new ArrayList<>();
-        for(int i = result.size() - 1; i >= 0; i--){
+        for (int i = result.size() - 1; i >= 0; i--) {
             answer.add(result.get(i));
         }
         return answer;
@@ -94,12 +96,51 @@ public class JavaDynamicTasks {
      * <p>
      * Здесь ответ 2 + 3 + 4 + 1 + 2 = 12
      */
+    //* Трудоемкость: T = O(height * width);
+    //* Ресурсоемкость: R = O(n)
     public static int shortestPathOnField(String inputName) throws IOException {
-        File file = new File(inputName);
-        BufferedReader fr = new BufferedReader(new FileReader(file));
-        String line = fr.readLine();
-        throw new NotImplementedError();
+        Scanner cin = new Scanner(new File(inputName));
+        int height = 0;
+        int width = 0;
+        List<String[]> list = new ArrayList<>();
+
+        while (cin.hasNextLine()) {
+            String line = cin.nextLine();
+            if (line.matches("^[0-9]( [0-9])*$")) {
+                String[] numbers = line.split(" ");
+                list.add(numbers);
+                width = numbers.length;
+                height++;
+            }
+        }
+        cin.close();
+
+        String[][] field = new String[height][width];
+        int[][] matrix = new int[height][width];
+
+        for (int i = 0; i < height; i++) {
+            field[i] = list.get(i);
+        }
+
+        matrix[0][0] = Integer.parseInt(field[0][0]);
+
+        for (int i = 1; i < height; i++) {
+            matrix[i][0] = matrix[i - 1][0] + Integer.parseInt(field[i][0]);
+        }
+
+        for (int i = 1; i < width; i++) {
+            matrix[0][i] = matrix[0][i - 1] + Integer.parseInt(field[0][i]);
+        }
+
+        for (int i = 1; i < height; i++) {
+            for (int j = 1; j < width; j++) {
+                matrix[i][j] = Math.min(matrix[i - 1][j - 1], Math.min(matrix[i][j - 1], matrix[i - 1][j])) + Integer.parseInt(field[i][j]);
+            }
+        }
+
+        return matrix[height - 1][width - 1];
     }
+
 
     // Задачу "Максимальное независимое множество вершин в графе без циклов"
     // смотрите в уроке 5
